@@ -1,0 +1,61 @@
+{
+  "network": {
+    "name": "RedeP2P Example",
+    "description": "Exemplo de rede P2P não estruturada"
+  },
+  "nodes": [
+    {
+      "id": "node1",
+      "name": "Node 1",
+      "resources": ["file1.txt", "video1.mp4", "music1.mp3"]
+    },
+    {
+      "id": "node2",
+      "name": "Node 2",
+      "resources": ["file2.txt", "document1.pdf"]
+    },
+    {
+      "id": "node3",
+      "name": "Node 3",
+      "resources": ["video2.mp4", "image1.jpg"]
+    },
+    {
+      "id": "node4",
+      "name": "Node 4",
+      "resources": ["music2.mp3", "file3.txt"]
+    },
+    {
+      "id": "node5",
+      "name": "Node 5",
+      "resources": ["document2.pdf", "video1.mp4"]
+    },
+    {
+      "id": "node6",
+      "name": "Node 6",
+      "resources": ["file4.txt", "music3.mp3", "image2.jpg"]
+    },
+    {
+      "id": "node7",
+      "name": "Node 7",
+      "resources": ["video3.mp4", "document3.pdf"]
+    },
+    {
+      "id": "node8",
+      "name": "Node 8",
+      "resources": ["music1.mp3", "file5.txt"]
+    }
+  ],
+  "connections": [
+    {"from": "node1", "to": "node2"},
+    {"from": "node1", "to": "node3"},
+    {"from": "node2", "to": "node4"},
+    {"from": "node2", "to": "node5"},
+    {"from": "node3", "to": "node5"},
+    {"from": "node3", "to": "node6"},
+    {"from": "node4", "to": "node7"},
+    {"from": "node5", "to": "node6"},
+    {"from": "node5", "to": "node7"},
+    {"from": "node6", "to": "node8"},
+    {"from": "node7", "to": "node8"}
+  ]
+}
