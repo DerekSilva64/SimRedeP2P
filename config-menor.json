@@ -1,7 +1,9 @@
 {
   "network": {
     "name": "RedeP2P Example",
-    "description": "Exemplo de rede P2P não estruturada"
+    "description": "Exemplo de rede P2P não estruturada",
+    "min_neighbors": 1,
+    "max_neighbors": 5
   },
   "nodes": [
     {

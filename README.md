@@ -25,11 +25,18 @@ RedeP2P/
 ## 📦 Requisitos
 
 - Python 3.6 ou superior
-- Nenhuma biblioteca externa necessária (usa apenas bibliotecas padrão do Python)
+- Bibliotecas necessárias (instalar via `pip install -r requirements.txt`):
+  - matplotlib (para gráficos de barras)
 
 ## 🚀 Como Usar
 
-### 1. Executar o programa
+### 1. Instalar dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Executar o programa
 
 ```bash
 python main.py
@@ -66,10 +73,14 @@ O arquivo de configuração deve ter a seguinte estrutura:
 
 **Campos:**
 - `network`: Informações gerais da rede (opcional)
+  - `name`: Nome da rede
+  - `description`: Descrição da rede
+  - `min_neighbors`: Número mínimo de vizinhos por nó (para validação)
+  - `max_neighbors`: Número máximo de vizinhos por nó (para validação)
 - `nodes`: Lista de nós, cada um com:
   - `id`: Identificador único (obrigatório)
   - `name`: Nome do nó (obrigatório)
-  - `resources`: Lista de recursos mantidos pelo nó (opcional)
+  - `resources`: Lista de recursos mantidos pelo nó (obrigatório, não pode estar vazio)
 - `connections`: Lista de conexões entre nós (bidirecionais)
   - `from`: ID do nó de origem
   - `to`: ID do nó de destino
@@ -82,8 +93,9 @@ O programa oferece as seguintes opções:
 2. **Busca por Passeio Aleatório** - Execute busca usando random walk
 3. **Busca Informada** - Execute busca usando heurísticas
 4. **Comparar todos os algoritmos** - Compare os três algoritmos lado a lado
-5. **Mostrar informações da rede** - Visualize a topologia completa
-6. **Listar todos os recursos** - Veja todos os recursos disponíveis
+5. **Comparar com gráficos interativos** - Compare com visualizações gráficas
+6. **Mostrar informações da rede** - Visualize a topologia completa
+7. **Listar todos os recursos** - Veja todos os recursos disponíveis
 0. **Sair** - Encerra o programa
 
 ## 🔍 Algoritmos de Busca
@@ -197,6 +209,28 @@ Para cada busca, o simulador coleta:
 - **Número de saltos**: Distância até o recurso
 - **Total de nós visitados**: Quantidade de nós únicos explorados
 - **Mensagens enviadas**: Número de mensagens de consulta enviadas
+
+## 📊 Visualização Gráfica
+
+O simulador gera um gráfico de barras comparativo com quatro métricas:
+
+- **Nós Visitados**: Quantidade de nós explorados por cada algoritmo
+- **Mensagens Enviadas**: Número de mensagens de consulta enviadas
+- **Taxa de Sucesso**: Porcentagem de sucesso em encontrar o recurso
+- **Número de Saltos**: Distância percorrida até encontrar o recurso
+
+O gráfico é salvo automaticamente na pasta `graphs/` com timestamp único.
+
+Além do gráfico, é exibida uma tabela comparativa textual com todas as métricas lado a lado.
+
+## ✅ Validações da Rede
+
+O simulador valida automaticamente:
+
+1. **Conectividade**: A rede não pode estar particionada - deve existir caminho entre qualquer par de nós
+2. **Limites de vizinhos**: Cada nó deve respeitar os limites `min_neighbors` e `max_neighbors`
+3. **Recursos**: Todos os nós devem ter pelo menos um recurso
+4. **Self-loops**: Não pode haver arestas de um nó para ele mesmo
 
 ## 🎯 Casos de Uso
 

@@ -1,7 +1,10 @@
 
 import sys
+import os
+from datetime import datetime
 from p2p_network import P2PNetwork
 from search_algorithms import SearchAlgorithms
+from visualization import NetworkVisualizer
 
 
 def print_menu():
@@ -14,8 +17,9 @@ def print_menu():
     print("  2 - Busca por Passeio Aleatório (Random Walk)")
     print("  3 - Busca Informada (Informed Search)")
     print("  4 - Comparar todos os algoritmos")
-    print("  5 - Mostrar informações da rede")
-    print("  6 - Listar todos os recursos disponíveis")
+    print("  5 - Comparar com gráficos interativos")
+    print("  6 - Mostrar informações da rede")
+    print("  7 - Listar todos os recursos disponíveis")
     print("  0 - Sair")
     print("="*60)
 
@@ -83,6 +87,49 @@ def compare_algorithms(network, origin_id, resource_name):
     print("\n" + "="*60 + "\n")
 
 
+def compare_algorithms_with_charts(network, origin_id, resource_name):
+    """Compara algoritmos e gera gráfico de barras."""
+    print("\n" + "="*60)
+    print("COMPARAÇÃO COM GRÁFICOS")
+    print("="*60)
+    print(f"Origem: {origin_id}")
+    print(f"Recurso: {resource_name}")
+    print("="*60 + "\n")
+    
+    print("Executando buscas...")
+    
+    # Executa os três algoritmos
+    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name)
+    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
+    result3 = SearchAlgorithms.informada_search(network, origin_id, resource_name)
+    
+    # Prepara dados para visualização
+    results_list = [
+        {'name': 'Inundação', 'result': result1},
+        {'name': 'Passeio Aleatório', 'result': result2},
+        {'name': 'Busca Informada', 'result': result3}
+    ]
+    
+    # Gera tabela comparativa
+    NetworkVisualizer.create_comparison_table(results_list)
+    
+    # Cria diretório para gráficos se não existir
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Gera gráfico de barras
+    print("Gerando gráfico de barras comparativo...")
+    chart_path = f'graphs/comparison_{timestamp}.png'
+    NetworkVisualizer.compare_algorithms_chart(results_list, save_path=chart_path)
+    
+    print("\n" + "="*60)
+    print("✓ Gráfico gerado com sucesso!")
+    print(f"  Verifique o arquivo: {chart_path}")
+    print("="*60 + "\n")
+
+
 def main():
     """Função principal do programa."""
     print("\n" + "="*60)
@@ -111,6 +158,23 @@ def main():
         print(f"✗ Erro ao carregar rede: {e}")
         return
     
+    # Valida a rede
+    print("\nValidando rede...")
+    is_valid, errors = network.validate_network()
+    
+    if not is_valid:
+        print("\n" + "="*60)
+        print("✗ ERRO: A REDE NÃO É VÁLIDA")
+        print("="*60)
+        print("\nProblemas encontrados:")
+        for i, error in enumerate(errors, 1):
+            print(f"  {i}. {error}")
+        print("\n" + "="*60)
+        print("\nPor favor, corrija o arquivo de configuração e tente novamente.")
+        return
+    else:
+        print("✓ Rede validada com sucesso!")
+    
     # Loop principal
     while True:
         print_menu()
@@ -120,13 +184,13 @@ def main():
             print("\nEncerrando simulador. Até logo!")
             break
         
-        elif choice == '5':
+        elif choice == '6':
             network.print_network_info()
         
-        elif choice == '6':
+        elif choice == '7':
             list_all_resources(network)
         
-        elif choice in ['1', '2', '3', '4']:
+        elif choice in ['1', '2', '3', '4', '5']:
             # Solicita origem
             print(f"\nNós disponíveis: {', '.join(network.nodes.keys())}")
             origin_id = input("Digite o ID do nó de origem: ").strip()
@@ -157,6 +221,9 @@ def main():
             
             elif choice == '4':
                 compare_algorithms(network, origin_id, resource_name)
+            
+            elif choice == '5':
+                compare_algorithms_with_charts(network, origin_id, resource_name)
         
         else:
             print("✗ Opção inválida. Tente novamente.")
