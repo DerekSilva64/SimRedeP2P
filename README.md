@@ -225,7 +225,7 @@ Compara os três algoritmos em quatro métricas principais:
 - **Taxa de Sucesso**: Porcentagem de sucesso em encontrar o recurso (0% ou 100%)
 - **Número de Saltos**: Distância percorrida até encontrar o recurso
 
-![Gráfico de Barras](test_graphs/comparison_20251208_100628.png)
+![Gráfico de Barras](test_graphs/comparison_20251208_100731.png)
 
 ### 2. Visualização do Grafo da Rede
 
@@ -234,7 +234,7 @@ O simulador pode visualizar a topologia da rede P2P de duas formas:
 #### Grafo Simples (sem busca)
 Mostra toda a estrutura da rede com seus nós e conexões:
 
-![Grafo da Rede](test_graphs/network_only_20251208_100628.png)
+![Grafo da Rede](test_graphs/network_only_20251208_100731.png)
 
 #### Grafo com Caminho de Busca
 Destaca visualmente o caminho percorrido por cada algoritmo:
@@ -246,13 +246,13 @@ Destaca visualmente o caminho percorrido por cada algoritmo:
 - **Linha vermelha grossa**: Arestas do caminho percorrido
 
 **Busca por Inundação:**
-![Grafo Inundação](test_graphs/graph_inundação_20251208_100628.png)
+![Grafo Inundação](test_graphs/graph_inundação_20251208_100731.png)
 
 **Busca por Passeio Aleatório:**
-![Grafo Passeio Aleatório](test_graphs/graph_passeio_aleatório_20251208_100628.png)
+![Grafo Passeio Aleatório](test_graphs/graph_passeio_aleatório_20251208_100731.png)
 
 **Busca Informada:**
-![Grafo Busca Informada](test_graphs/graph_busca_informada_20251208_100628.png)
+![Grafo Busca Informada](test_graphs/graph_busca_informada_20251208_100731.png)
 
 ### 3. Tabela Comparativa
 
