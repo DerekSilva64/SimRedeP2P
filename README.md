@@ -27,6 +27,7 @@ RedeP2P/
 - Python 3.6 ou superior
 - Bibliotecas necessárias (instalar via `pip install -r requirements.txt`):
   - matplotlib (para gráficos de barras)
+  - networkx (para visualização de grafos)
 
 ## 🚀 Como Usar
 
@@ -92,10 +93,11 @@ O programa oferece as seguintes opções:
 1. **Busca por Inundação** - Execute busca usando flooding
 2. **Busca por Passeio Aleatório** - Execute busca usando random walk
 3. **Busca Informada** - Execute busca usando heurísticas
-4. **Comparar todos os algoritmos** - Compare os três algoritmos lado a lado
-5. **Comparar com gráficos interativos** - Compare com visualizações gráficas
-6. **Mostrar informações da rede** - Visualize a topologia completa
-7. **Listar todos os recursos** - Veja todos os recursos disponíveis
+4. **Comparar todos os algoritmos** - Compare os três algoritmos lado a lado (textual)
+5. **Comparar com gráficos** - Gera gráfico de barras + grafos da rede com caminhos
+6. **Visualizar grafo da rede** - Exibe apenas a topologia da rede
+7. **Mostrar informações da rede** - Lista detalhada de nós e conexões
+8. **Listar todos os recursos** - Veja todos os recursos disponíveis
 0. **Sair** - Encerra o programa
 
 ## 🔍 Algoritmos de Busca
@@ -210,18 +212,53 @@ Para cada busca, o simulador coleta:
 - **Total de nós visitados**: Quantidade de nós únicos explorados
 - **Mensagens enviadas**: Número de mensagens de consulta enviadas
 
-## 📊 Visualização Gráfica
+## 📊 Visualizações Gráficas
 
-O simulador gera um gráfico de barras comparativo com quatro métricas:
+O simulador gera visualizações para análise e comparação dos algoritmos:
+
+### 1. Gráfico de Barras Comparativo
+
+Compara os três algoritmos em quatro métricas principais:
 
 - **Nós Visitados**: Quantidade de nós explorados por cada algoritmo
 - **Mensagens Enviadas**: Número de mensagens de consulta enviadas
-- **Taxa de Sucesso**: Porcentagem de sucesso em encontrar o recurso
+- **Taxa de Sucesso**: Porcentagem de sucesso em encontrar o recurso (0% ou 100%)
 - **Número de Saltos**: Distância percorrida até encontrar o recurso
 
-O gráfico é salvo automaticamente na pasta `graphs/` com timestamp único.
+![Gráfico de Barras](test_graphs/comparison_20251208_100628.png)
 
-Além do gráfico, é exibida uma tabela comparativa textual com todas as métricas lado a lado.
+### 2. Visualização do Grafo da Rede
+
+O simulador pode visualizar a topologia da rede P2P de duas formas:
+
+#### Grafo Simples (sem busca)
+Mostra toda a estrutura da rede com seus nós e conexões:
+
+![Grafo da Rede](test_graphs/network_only_20251208_100628.png)
+
+#### Grafo com Caminho de Busca
+Destaca visualmente o caminho percorrido por cada algoritmo:
+
+- 🟢 **Verde**: Nó de origem da busca
+- 🔵 **Azul**: Nós visitados durante a busca
+- 🔴 **Vermelho**: Nó onde o recurso foi encontrado
+- ⚪ **Cinza**: Nós não visitados
+- **Linha vermelha grossa**: Arestas do caminho percorrido
+
+**Busca por Inundação:**
+![Grafo Inundação](test_graphs/graph_inundação_20251208_100628.png)
+
+**Busca por Passeio Aleatório:**
+![Grafo Passeio Aleatório](test_graphs/graph_passeio_aleatório_20251208_100628.png)
+
+**Busca Informada:**
+![Grafo Busca Informada](test_graphs/graph_busca_informada_20251208_100628.png)
+
+### 3. Tabela Comparativa
+
+Além dos gráficos, é exibida uma tabela comparativa textual no console com todas as métricas lado a lado.
+
+Todos os gráficos são salvos automaticamente na pasta `graphs/` com timestamp único.
 
 ## ✅ Validações da Rede
 
