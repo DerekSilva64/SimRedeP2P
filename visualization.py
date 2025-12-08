@@ -1,4 +1,9 @@
 import matplotlib.pyplot as plt
+try:
+    import networkx as nx
+    HAS_NETWORKX = True
+except ImportError:
+    HAS_NETWORKX = False
 
 
 class NetworkVisualizer:
@@ -122,3 +127,128 @@ class NetworkVisualizer:
             print(f"{name:<25} {success:<10} {nodes:<10} {messages:<12} {hops:<10}")
         
         print("="*80 + "\n")
+    
+    @staticmethod
+    def plot_network_graph(network, result=None, save_path=None):
+        """
+        Cria uma visualização do grafo da rede.
+        
+        Args:
+            network: Objeto P2PNetwork
+            result: Resultado da busca (opcional, para destacar caminho)
+            save_path: Caminho opcional para salvar o gráfico
+        """
+        if not HAS_NETWORKX:
+            print("\n⚠ NetworkX não está instalado. Visualização do grafo não disponível.")
+            print("  Instale com: pip install networkx")
+            return
+        
+        # Cria grafo
+        G = nx.Graph()
+        
+        # Adiciona nós
+        for node_id in network.nodes:
+            G.add_node(node_id)
+        
+        # Adiciona arestas (evita duplicatas)
+        edges_added = set()
+        for node_id, node in network.nodes.items():
+            for neighbor in node.neighbors:
+                edge = tuple(sorted([node_id, neighbor.node_id]))
+                if edge not in edges_added:
+                    G.add_edge(node_id, neighbor.node_id)
+                    edges_added.add(edge)
+        
+        # Layout
+        pos = nx.spring_layout(G, seed=42, k=1.5, iterations=50)
+        
+        fig, ax = plt.subplots(figsize=(16, 12))
+        
+        # Define cores e tamanhos dos nós
+        if result:
+            # Com resultado de busca - destaca caminho
+            node_colors = []
+            node_sizes = []
+            
+            for node_id in G.nodes():
+                if node_id == result['origin']:
+                    node_colors.append('#2ecc71')  # Verde - origem
+                    node_sizes.append(700)
+                elif result['found'] and node_id == result['found_at']:
+                    node_colors.append('#e74c3c')  # Vermelho - encontrado
+                    node_sizes.append(700)
+                elif node_id in result['path']:
+                    node_colors.append('#3498db')  # Azul - visitado
+                    node_sizes.append(500)
+                else:
+                    node_colors.append('#95a5a6')  # Cinza - não visitado
+                    node_sizes.append(300)
+            
+            # Desenha arestas
+            nx.draw_networkx_edges(G, pos, alpha=0.2, width=1.5, ax=ax)
+            
+            # Destaca arestas no caminho
+            if len(result['path']) > 1:
+                path_edges = [(result['path'][i], result['path'][i+1]) 
+                             for i in range(len(result['path'])-1) 
+                             if G.has_edge(result['path'][i], result['path'][i+1])]
+                nx.draw_networkx_edges(G, pos, edgelist=path_edges, 
+                                      edge_color='#e74c3c', width=3, 
+                                      alpha=0.7, ax=ax)
+            
+            # Título com informações da busca
+            status = "ENCONTRADO" if result['found'] else "NÃO ENCONTRADO"
+            title = f"Grafo da Rede P2P - Busca: {result['resource']} - Status: {status}"
+            
+            # Legenda
+            legend_elements = [
+                plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#2ecc71', 
+                          markersize=12, label='Nó Origem'),
+                plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#3498db', 
+                          markersize=12, label='Nós Visitados'),
+            ]
+            
+            if result['found']:
+                legend_elements.append(
+                    plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#e74c3c', 
+                              markersize=12, label='Recurso Encontrado')
+                )
+            
+            legend_elements.append(
+                plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#95a5a6', 
+                          markersize=12, label='Nós Não Visitados')
+            )
+            
+            ax.legend(handles=legend_elements, loc='upper left', fontsize=11, 
+                     framealpha=0.9, edgecolor='black')
+        else:
+            # Sem resultado - visualização simples da rede
+            node_colors = '#3498db'
+            node_sizes = 500
+            
+            # Desenha arestas
+            nx.draw_networkx_edges(G, pos, alpha=0.3, width=1.5, ax=ax)
+            
+            title = f"Grafo da Rede P2P - {network.name}"
+        
+        # Desenha nós
+        nx.draw_networkx_nodes(G, pos, node_color=node_colors, 
+                              node_size=node_sizes, alpha=0.9, 
+                              edgecolors='black', linewidths=2, ax=ax)
+        
+        # Desenha labels
+        nx.draw_networkx_labels(G, pos, font_size=9, font_weight='bold', 
+                               font_color='white', ax=ax)
+        
+        plt.title(title, fontsize=14, fontweight='bold', pad=20)
+        plt.axis('off')
+        plt.tight_layout()
+        
+        # Salva ou exibe
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"✓ Grafo salvo em: {save_path}")
+        else:
+            plt.show()
+        
+        plt.close()

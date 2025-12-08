@@ -17,9 +17,10 @@ def print_menu():
     print("  2 - Busca por Passeio Aleatório (Random Walk)")
     print("  3 - Busca Informada (Informed Search)")
     print("  4 - Comparar todos os algoritmos")
-    print("  5 - Comparar com gráficos interativos")
-    print("  6 - Mostrar informações da rede")
-    print("  7 - Listar todos os recursos disponíveis")
+    print("  5 - Comparar com gráficos")
+    print("  6 - Visualizar grafo da rede")
+    print("  7 - Mostrar informações da rede")
+    print("  8 - Listar todos os recursos disponíveis")
     print("  0 - Sair")
     print("="*60)
 
@@ -124,9 +125,41 @@ def compare_algorithms_with_charts(network, origin_id, resource_name):
     chart_path = f'graphs/comparison_{timestamp}.png'
     NetworkVisualizer.compare_algorithms_chart(results_list, save_path=chart_path)
     
+    # Gera grafos para cada algoritmo
+    print("\nGerando visualizações dos grafos...")
+    for result_data in results_list:
+        algo_name = result_data['name'].lower().replace(' ', '_')
+        graph_path = f'graphs/graph_{algo_name}_{timestamp}.png'
+        NetworkVisualizer.plot_network_graph(network, result_data['result'], save_path=graph_path)
+    
     print("\n" + "="*60)
-    print("✓ Gráfico gerado com sucesso!")
-    print(f"  Verifique o arquivo: {chart_path}")
+    print("✓ Todos os gráficos foram gerados com sucesso!")
+    print(f"  Verifique a pasta 'graphs/' para visualizar os resultados.")
+    print("="*60 + "\n")
+
+
+def visualize_network_graph(network):
+    """Visualiza o grafo da rede sem busca."""
+    print("\n" + "="*60)
+    print("VISUALIZAÇÃO DO GRAFO DA REDE")
+    print("="*60)
+    print(f"Rede: {network.name}")
+    print(f"Total de nós: {len(network.nodes)}")
+    print("="*60 + "\n")
+    
+    # Cria diretório para gráficos se não existir
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    graph_path = f'graphs/network_graph_{timestamp}.png'
+    
+    print("Gerando visualização do grafo...")
+    NetworkVisualizer.plot_network_graph(network, save_path=graph_path)
+    
+    print("\n" + "="*60)
+    print("✓ Grafo gerado com sucesso!")
+    print(f"  Verifique o arquivo: {graph_path}")
     print("="*60 + "\n")
 
 
@@ -185,9 +218,12 @@ def main():
             break
         
         elif choice == '6':
-            network.print_network_info()
+            visualize_network_graph(network)
         
         elif choice == '7':
+            network.print_network_info()
+        
+        elif choice == '8':
             list_all_resources(network)
         
         elif choice in ['1', '2', '3', '4', '5']:
