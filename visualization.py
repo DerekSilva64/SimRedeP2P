@@ -169,6 +169,7 @@ class NetworkVisualizer:
             # Com resultado de busca - destaca caminho
             node_colors = []
             node_sizes = []
+            visited_nodes = set(result.get('visited_nodes', result['path']))
             
             for node_id in G.nodes():
                 if node_id == result['origin']:
@@ -177,24 +178,45 @@ class NetworkVisualizer:
                 elif result['found'] and node_id == result['found_at']:
                     node_colors.append('#e74c3c')  # Vermelho - encontrado
                     node_sizes.append(700)
-                elif node_id in result['path']:
+                elif node_id in visited_nodes:
                     node_colors.append('#3498db')  # Azul - visitado
                     node_sizes.append(500)
                 else:
                     node_colors.append('#95a5a6')  # Cinza - não visitado
                     node_sizes.append(300)
             
-            # Desenha arestas
-            nx.draw_networkx_edges(G, pos, alpha=0.2, width=1.5, ax=ax)
+            # Desenha todas as arestas padrão primeiro
+            nx.draw_networkx_edges(G, pos, alpha=0.15, width=1, ax=ax, edge_color='#95a5a6')
             
-            # Destaca arestas no caminho
-            if len(result['path']) > 1:
-                path_edges = [(result['path'][i], result['path'][i+1]) 
-                             for i in range(len(result['path'])-1) 
-                             if G.has_edge(result['path'][i], result['path'][i+1])]
-                nx.draw_networkx_edges(G, pos, edgelist=path_edges, 
-                                      edge_color='#e74c3c', width=3, 
-                                      alpha=0.7, ax=ax)
+            # Coleta todas as arestas entre nós visitados (em azul)
+            visited_nodes = set(result.get('visited_nodes', result['path']))
+            visited_edges = []
+            for node_id in visited_nodes:
+                node = network.nodes.get(node_id)
+                if node:
+                    for neighbor in node.neighbors:
+                        if neighbor.node_id in visited_nodes:
+                            edge = tuple(sorted([node_id, neighbor.node_id]))
+                            if edge not in visited_edges:
+                                visited_edges.append(edge)
+            
+            # Desenha arestas visitadas em azul
+            if visited_edges:
+                nx.draw_networkx_edges(G, pos, edgelist=visited_edges, 
+                                      edge_color='#3498db', width=2.5, 
+                                      alpha=0.6, ax=ax)
+            
+            # Desenha o caminho exato encontrado (em verde) por cima
+            if result['found'] and len(result['path']) > 1:
+                path_edges = []
+                for i in range(len(result['path'])-1):
+                    if G.has_edge(result['path'][i], result['path'][i+1]):
+                        path_edges.append((result['path'][i], result['path'][i+1]))
+                
+                if path_edges:
+                    nx.draw_networkx_edges(G, pos, edgelist=path_edges, 
+                                          edge_color='#2ecc71', width=4, 
+                                          alpha=0.9, ax=ax)
             
             # Título com informações da busca
             status = "ENCONTRADO" if result['found'] else "NÃO ENCONTRADO"
@@ -213,10 +235,19 @@ class NetworkVisualizer:
                     plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#e74c3c', 
                               markersize=12, label='Recurso Encontrado')
                 )
+                legend_elements.append(
+                    plt.Line2D([0], [0], color='#2ecc71', linewidth=4, 
+                              label='Caminho Encontrado')
+                )
             
             legend_elements.append(
                 plt.Line2D([0], [0], marker='o', color='w', markerfacecolor='#95a5a6', 
                           markersize=12, label='Nós Não Visitados')
+            )
+            
+            legend_elements.append(
+                plt.Line2D([0], [0], color='#3498db', linewidth=2, linestyle='dashed',
+                          label='Arestas Visitadas')
             )
             
             ax.legend(handles=legend_elements, loc='upper left', fontsize=11, 

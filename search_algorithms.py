@@ -32,11 +32,15 @@ class SearchAlgorithms:
                 'messages_sent': 0
             }
         
-        # BFS com controle de TTL
+        # Flooding: propaga para todos os nós até TTL, não para ao encontrar
         visited = set()
+        visited_list = []  # Mantém ordem de visitação
         queue = deque([(origin_node, 0, [origin_id])])  # (nó, profundidade, caminho)
         visited.add(origin_id)
+        visited_list.append(origin_id)
         messages_sent = 0
+        found_at = None
+        found_path = None
         
         while queue:
             current_node, depth, path = queue.popleft()
@@ -45,38 +49,46 @@ class SearchAlgorithms:
             if depth >= ttl:
                 continue
             
-            # Explora vizinhos
+            # Explora TODOS os vizinhos (flooding continua mesmo após encontrar)
             for neighbor in current_node.neighbors:
                 messages_sent += 1
                 
                 if neighbor.node_id not in visited:
                     visited.add(neighbor.node_id)
+                    visited_list.append(neighbor.node_id)
                     new_path = path + [neighbor.node_id]
                     
-                    # Verifica se encontrou o recurso
-                    if neighbor.has_resource(resource_name):
-                        return {
-                            'found': True,
-                            'resource': resource_name,
-                            'origin': origin_id,
-                            'found_at': neighbor.node_id,
-                            'path': new_path,
-                            'nodes_visited': len(visited),
-                            'messages_sent': messages_sent
-                        }
+                    # Verifica se encontrou o recurso (mas continua propagando)
+                    if neighbor.has_resource(resource_name) and found_at is None:
+                        found_at = neighbor.node_id
+                        found_path = new_path
                     
+                    # Continua propagando independentemente de ter encontrado
                     queue.append((neighbor, depth + 1, new_path))
         
-        # Recurso não encontrado
-        return {
-            'found': False,
-            'resource': resource_name,
-            'origin': origin_id,
-            'found_at': None,
-            'path': list(visited),
-            'nodes_visited': len(visited),
-            'messages_sent': messages_sent
-        }
+        # Retorna resultado
+        if found_at:
+            return {
+                'found': True,
+                'resource': resource_name,
+                'origin': origin_id,
+                'found_at': found_at,
+                'path': found_path,
+                'visited_nodes': visited_list,  # Todos os nós visitados
+                'nodes_visited': len(visited),
+                'messages_sent': messages_sent
+            }
+        else:
+            return {
+                'found': False,
+                'resource': resource_name,
+                'origin': origin_id,
+                'found_at': None,
+                'path': visited_list,
+                'visited_nodes': visited_list,
+                'nodes_visited': len(visited),
+                'messages_sent': messages_sent
+            }
     
     @staticmethod
     def caminho_aleatorio_search(network, origin_id, resource_name, max_steps=50):
@@ -128,6 +140,7 @@ class SearchAlgorithms:
                     'origin': origin_id,
                     'found_at': next_node.node_id,
                     'path': path,
+                    'visited_nodes': list(visited),
                     'nodes_visited': len(visited),
                     'messages_sent': messages_sent
                 }
@@ -141,6 +154,7 @@ class SearchAlgorithms:
             'origin': origin_id,
             'found_at': None,
             'path': path,
+            'visited_nodes': list(visited),
             'nodes_visited': len(visited),
             'messages_sent': messages_sent
         }
@@ -207,6 +221,7 @@ class SearchAlgorithms:
                             'origin': origin_id,
                             'found_at': neighbor.node_id,
                             'path': new_path,
+                            'visited_nodes': list(visited),
                             'nodes_visited': len(visited),
                             'messages_sent': messages_sent
                         }
@@ -223,6 +238,7 @@ class SearchAlgorithms:
             'origin': origin_id,
             'found_at': None,
             'path': list(visited),
+            'visited_nodes': list(visited),
             'nodes_visited': len(visited),
             'messages_sent': messages_sent
         }

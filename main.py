@@ -46,17 +46,18 @@ def list_all_resources(network):
     print("="*60 + "\n")
 
 
-def compare_algorithms(network, origin_id, resource_name):
+def compare_algorithms(network, origin_id, resource_name, ttl=10):
     """Compara todos os algoritmos de busca."""
     print("\n" + "="*60)
     print("COMPARAÇÃO DE ALGORITMOS")
     print("="*60)
     print(f"Origem: {origin_id}")
     print(f"Recurso: {resource_name}")
+    print(f"TTL: {ttl}")
     print("="*60 + "\n")
     
     # Busca por Inundação
-    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name)
+    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
     print(f"\n1. BUSCA POR INUNDAÇÃO")
     print(f"   Status: {'✓ Encontrado' if result1['found'] else '✗ Não encontrado'}")
     if result1['found']:
@@ -88,19 +89,20 @@ def compare_algorithms(network, origin_id, resource_name):
     print("\n" + "="*60 + "\n")
 
 
-def compare_algorithms_with_charts(network, origin_id, resource_name):
+def compare_algorithms_with_charts(network, origin_id, resource_name, ttl=10):
     """Compara algoritmos e gera gráfico de barras."""
     print("\n" + "="*60)
     print("COMPARAÇÃO COM GRÁFICOS")
     print("="*60)
     print(f"Origem: {origin_id}")
     print(f"Recurso: {resource_name}")
+    print(f"TTL: {ttl}")
     print("="*60 + "\n")
     
     print("Executando buscas...")
     
     # Executa os três algoritmos
-    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name)
+    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
     result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
     result3 = SearchAlgorithms.informada_search(network, origin_id, resource_name)
     
@@ -242,24 +244,82 @@ def main():
                 print("✗ Erro: Nome do recurso não pode estar vazio.")
                 continue
             
+            # Solicita TTL para flooding
+            ttl = None
+            if choice == '1':
+                ttl_input = input("Digite o TTL (Time To Live) para o flooding (padrão: 10): ").strip()
+                if ttl_input:
+                    try:
+                        ttl = int(ttl_input)
+                        if ttl <= 0:
+                            print("✗ Erro: TTL deve ser maior que 0. Usando padrão (10).")
+                            ttl = 10
+                    except ValueError:
+                        print("✗ Erro: TTL inválido. Usando padrão (10).")
+                        ttl = 10
+                else:
+                    ttl = 10
+            
             # Executa busca
             if choice == '1':
-                result = SearchAlgorithms.inudacao_search(network, origin_id, resource_name)
-                network.print_search_result(result, "Busca por Inundação (Flooding)")
+                result = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
+                network.print_search_result(result, f"Busca por Inundação (Flooding) - TTL: {ttl}")
+                
+                # Gera visualização do caminho
+                if not os.path.exists('graphs'):
+                    os.makedirs('graphs')
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                graph_path = f'graphs/path_inundacao_{timestamp}.png'
+                print("\nGerando visualização do caminho percorrido...")
+                NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '2':
                 result = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
                 network.print_search_result(result, "Busca por Passeio Aleatório (Random Walk)")
+                
+                # Gera visualização do caminho
+                if not os.path.exists('graphs'):
+                    os.makedirs('graphs')
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                graph_path = f'graphs/path_passeio_aleatorio_{timestamp}.png'
+                print("\nGerando visualização do caminho percorrido...")
+                NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '3':
                 result = SearchAlgorithms.informada_search(network, origin_id, resource_name)
                 network.print_search_result(result, "Busca Informada (Informed Search)")
+                
+                # Gera visualização do caminho
+                if not os.path.exists('graphs'):
+                    os.makedirs('graphs')
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                graph_path = f'graphs/path_busca_informada_{timestamp}.png'
+                print("\nGerando visualização do caminho percorrido...")
+                NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '4':
-                compare_algorithms(network, origin_id, resource_name)
+                ttl_input = input("Digite o TTL para o flooding (padrão: 10): ").strip()
+                ttl = 10
+                if ttl_input:
+                    try:
+                        ttl = int(ttl_input)
+                        if ttl <= 0:
+                            ttl = 10
+                    except ValueError:
+                        ttl = 10
+                compare_algorithms(network, origin_id, resource_name, ttl)
             
             elif choice == '5':
-                compare_algorithms_with_charts(network, origin_id, resource_name)
+                ttl_input = input("Digite o TTL para o flooding (padrão: 10): ").strip()
+                ttl = 10
+                if ttl_input:
+                    try:
+                        ttl = int(ttl_input)
+                        if ttl <= 0:
+                            ttl = 10
+                    except ValueError:
+                        ttl = 10
+                compare_algorithms_with_charts(network, origin_id, resource_name, ttl)
         
         else:
             print("✗ Opção inválida. Tente novamente.")
