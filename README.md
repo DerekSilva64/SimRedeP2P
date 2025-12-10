@@ -214,51 +214,93 @@ Para cada busca, o simulador coleta:
 
 ## 📊 Visualizações Gráficas
 
-O simulador gera visualizações para análise e comparação dos algoritmos:
+O simulador gera visualizações automáticas para análise e comparação dos algoritmos. Todos os gráficos são salvos na pasta `graphs/` com timestamp único para organização.
 
 ### 1. Gráfico de Barras Comparativo
 
-Compara os três algoritmos em quatro métricas principais:
+**Arquivo gerado:** `graphs/comparison_YYYYMMDD_HHMMSS.png`
 
-- **Nós Visitados**: Quantidade de nós explorados por cada algoritmo
-- **Mensagens Enviadas**: Número de mensagens de consulta enviadas
-- **Taxa de Sucesso**: Porcentagem de sucesso em encontrar o recurso (0% ou 100%)
-- **Número de Saltos**: Distância percorrida até encontrar o recurso
+Este gráfico apresenta uma comparação visual completa dos três algoritmos através de quatro subgráficos:
 
-![Gráfico de Barras](test_graphs/comparison_20251208_100731.png)
+- **Nós Visitados**: Mostra quantos nós cada algoritmo explorou durante a busca. Valores menores indicam maior eficiência em termos de exploração da rede.
+
+- **Mensagens Enviadas**: Exibe o número total de mensagens de consulta transmitidas na rede. Esta métrica é crucial para avaliar o overhead de tráfego gerado por cada algoritmo.
+
+- **Taxa de Sucesso**: Apresenta se o algoritmo conseguiu encontrar o recurso (100%) ou não (0%). Esta métrica binária indica a eficácia de cada estratégia para a busca específica.
+
+- **Número de Saltos**: Mostra a distância do caminho encontrado (apenas quando o recurso foi localizado). Valores menores indicam caminhos mais curtos entre origem e destino.
+
+**Como interpretar:** Compare as barras entre os três algoritmos. Inundação geralmente visita mais nós e envia mais mensagens, mas garante encontrar o recurso. Passeio Aleatório é mais econômico em recursos mas menos confiável. Busca Informada tende a balancear eficiência e taxa de sucesso.
+
+![Gráfico de Barras - Exemplo 1](test_graphs/config-sala/comparacao_1.png)
+
+![Gráfico de Barras - Exemplo 2](test_graphs/config-sala/comparacao_2.png)
 
 ### 2. Visualização do Grafo da Rede
 
-O simulador pode visualizar a topologia da rede P2P de duas formas:
+O simulador gera visualizações da topologia da rede usando a biblioteca NetworkX, permitindo análise visual dos caminhos percorridos.
 
-#### Grafo Simples (sem busca)
-Mostra toda a estrutura da rede com seus nós e conexões:
+#### A) Grafo da Rede Completa (sem busca)
 
-![Grafo da Rede](test_graphs/network_only_20251208_100731.png)
+**Arquivo gerado:** `graphs/network_graph_YYYYMMDD_HHMMSS.png`
 
-#### Grafo com Caminho de Busca
-Destaca visualmente o caminho percorrido por cada algoritmo:
+**Gerado por:** Opção 6 do menu - "Visualizar grafo da rede"
 
-- 🟢 **Verde**: Nó de origem da busca
-- 🔵 **Azul**: Nós visitados durante a busca
-- 🔴 **Vermelho**: Nó onde o recurso foi encontrado
-- ⚪ **Cinza**: Nós não visitados
-- **Linha vermelha grossa**: Arestas do caminho percorrido
+Mostra a topologia completa da rede P2P:
+- Todos os nós da rede (círculos azuis)
+- Todas as conexões bidirecionais entre nós (linhas)
+- Labels identificando cada nó
+
+**Utilidade:** Útil para entender a estrutura da rede, identificar nós centrais, detectar gargalos e avaliar a densidade de conexões.
+
+![Grafo da Rede](test_graphs/config-sala/grafo.png)
+
+#### B) Grafos com Caminhos de Busca
+
+**Arquivos gerados:** 
+- `graphs/graph_inundacao_YYYYMMDD_HHMMSS.png`
+- `graphs/graph_passeio_aleatorio_YYYYMMDD_HHMMSS.png`
+- `graphs/graph_busca_informada_YYYYMMDD_HHMMSS.png`
+
+**Gerado por:** Opção 5 do menu - "Comparar com gráficos"
+
+Estes grafos destacam visualmente o comportamento de cada algoritmo durante a busca:
+
+**Legenda de Cores:**
+- 🟢 **Verde (nó)**: Nó de origem da busca
+- 🔵 **Azul (nós)**: Nós visitados durante a busca
+- 🔴 **Vermelho (nó)**: Nó onde o recurso foi encontrado
+- ⚪ **Cinza (nós)**: Nós que não foram visitados
+- **Linha verde grossa**: Caminho final encontrado (sequência de saltos da origem até o recurso)
+- **Linha azul tracejada**: Arestas exploradas durante a busca
 
 **Busca por Inundação:**
-![Grafo Inundação](test_graphs/graph_inundação_20251208_100731.png)
+
+![Grafo Inundação - Exemplo 1](test_graphs/config-sala/inundacao_1.png)
+
+![Grafo Inundação - Exemplo 2](test_graphs/config-sala/inundacao_2.png)
+
+*Características visuais:* Grande número de nós azuis e arestas visitadas, mostrando a propagação ampla da consulta pela rede.
 
 **Busca por Passeio Aleatório:**
-![Grafo Passeio Aleatório](test_graphs/graph_passeio_aleatório_20251208_100731.png)
+
+![Grafo Passeio Aleatório - Exemplo 1](test_graphs/config-sala/passeio_aleatorio_1.png)
+
+![Grafo Passeio Aleatório - Exemplo 2](test_graphs/config-sala/passeio_aleatorio_2.png)
+
+*Características visuais:* Caminho serpenteado com menos nós visitados, evidenciando a exploração aleatória e menos sistemática.
 
 **Busca Informada:**
-![Grafo Busca Informada](test_graphs/graph_busca_informada_20251208_100731.png)
+
+![Grafo Busca Informada - Exemplo 1](test_graphs/config-sala/busca_informada_1.png)
+
+![Grafo Busca Informada - Exemplo 2](test_graphs/config-sala/busca_informada_2.png)
+
+*Características visuais:* Exploração direcionada com número intermediário de nós visitados, demonstrando o uso de heurísticas.
 
 ### 3. Tabela Comparativa
 
-Além dos gráficos, é exibida uma tabela comparativa textual no console com todas as métricas lado a lado.
-
-Todos os gráficos são salvos automaticamente na pasta `graphs/` com timestamp único.
+Além dos gráficos visuais, o simulador exibe no console uma tabela comparativa formatada com todas as métricas lado a lado, facilitando a análise numérica precisa dos resultados.
 
 ## ✅ Validações da Rede
 

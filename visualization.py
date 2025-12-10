@@ -269,7 +269,7 @@ class NetworkVisualizer:
         
         # Desenha labels
         nx.draw_networkx_labels(G, pos, font_size=9, font_weight='bold', 
-                               font_color='white', ax=ax)
+                               font_color='black', ax=ax)
         
         plt.title(title, fontsize=14, fontweight='bold', pad=20)
         plt.axis('off')

@@ -15,12 +15,12 @@ def test_complete_visualization():
     
     # Carrega rede
     network = P2PNetwork()
-    network.load_from_json('config-menor.json')
+    network.load_from_json('config-sala.json')
     print(f"\n✓ Rede carregada: {network.name}")
     
     # Executa buscas
-    origin = 'node1'
-    resource = 'video3.mp4'
+    origin = 'n1'
+    resource = 'r4'
     
     print(f"\nExecutando buscas para '{resource}' a partir de '{origin}'...")
     

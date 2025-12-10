@@ -91,7 +91,8 @@ class SearchAlgorithms:
             }
     
     @staticmethod
-    def caminho_aleatorio_search(network, origin_id, resource_name, max_steps=50):
+    def caminho_aleatorio_search(network, origin_id, resource_name, ttl=10):
+
         origin_node = network.get_node(origin_id)
         if not origin_node:
             return {
@@ -116,49 +117,75 @@ class SearchAlgorithms:
                 'messages_sent': 0
             }
         
-        current_node = origin_node
-        path = [origin_id]
-        visited = {origin_id}
+        # Random Walk: cada tentativa caminha por até TTL passos
+        # Tenta múltiplos caminhos aleatórios até encontrar ou esgotar tentativas
+        visited_global = set([origin_id])
         messages_sent = 0
+        max_attempts = 10  # Número máximo de caminhos diferentes a tentar
+        attempts = 0
         
-        for step in range(max_steps):
-            # Se não há vizinhos, termina
-            if not current_node.neighbors:
-                break
+        while attempts < max_attempts:
+            attempts += 1
             
-            # Escolhe um vizinho aleatório
-            next_node = random.choice(current_node.neighbors)
-            messages_sent += 1
-            path.append(next_node.node_id)
-            visited.add(next_node.node_id)
+            # Inicia um novo caminho da origem (cada um com TTL próprio)
+            current_node = origin_node
+            previous_node = None
+            local_visited = set([origin_id])
+            current_path = [origin_id]
+            steps = 0
             
-            # Verifica se encontrou o recurso
-            if next_node.has_resource(resource_name):
-                return {
-                    'found': True,
-                    'resource': resource_name,
-                    'origin': origin_id,
-                    'found_at': next_node.node_id,
-                    'path': path,
-                    'visited_nodes': list(visited),
-                    'nodes_visited': len(visited),
-                    'messages_sent': messages_sent
-                }
+            # Caminha aleatoriamente por até TTL passos
+            while steps < ttl:
+                # Filtra vizinhos (não volta pro anterior e não revisita neste caminho)
+                available = [n for n in current_node.neighbors 
+                            if n.node_id not in local_visited and 
+                            (previous_node is None or n.node_id != previous_node.node_id)]
+                
+                if not available:
+                    # Sem vizinhos disponíveis, reinicia da origem com novo caminho
+                    break
+                
+                # Escolhe um vizinho aleatório
+                chosen_node = random.choice(available)
+                messages_sent += 1
+                steps += 1
+                
+                # Marca como visitado
+                local_visited.add(chosen_node.node_id)
+                visited_global.add(chosen_node.node_id)
+                current_path.append(chosen_node.node_id)
+                
+                # Verifica se encontrou
+                if chosen_node.has_resource(resource_name):
+                    return {
+                        'found': True,
+                        'resource': resource_name,
+                        'origin': origin_id,
+                        'found_at': chosen_node.node_id,
+                        'path': current_path,
+                        'visited_nodes': list(visited_global),
+                        'nodes_visited': len(visited_global),
+                        'messages_sent': messages_sent
+                    }
+                
+                # Avança
+                previous_node = current_node
+                current_node = chosen_node
             
-            current_node = next_node
+            # TTL esgotado neste caminho, tenta outro
         
-        # Recurso não encontrado
+        # Não encontrou
         return {
             'found': False,
             'resource': resource_name,
             'origin': origin_id,
             'found_at': None,
-            'path': path,
-            'visited_nodes': list(visited),
-            'nodes_visited': len(visited),
+            'path': [origin_id],
+            'visited_nodes': list(visited_global),
+            'nodes_visited': len(visited_global),
             'messages_sent': messages_sent
         }
-    
+
     @staticmethod
     def informada_search(network, origin_id, resource_name, max_nodes=20):
 

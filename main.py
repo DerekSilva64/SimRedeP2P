@@ -66,9 +66,9 @@ def compare_algorithms(network, origin_id, resource_name, ttl=10):
     print(f"   Nós visitados: {result1['nodes_visited']}")
     print(f"   Mensagens: {result1['messages_sent']}")
     
-    # Busca por Passeio Aleatório
-    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
-    print(f"\n2. BUSCA POR PASSEIO ALEATÓRIO")
+    # Busca por Caminho Aleatório
+    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name, ttl=ttl)
+    print(f"\n2. BUSCA POR CAMINHO ALEATÓRIO")
     print(f"   Status: {'✓ Encontrado' if result2['found'] else '✗ Não encontrado'}")
     if result2['found']:
         print(f"   Encontrado em: {result2['found_at']}")
@@ -103,7 +103,7 @@ def compare_algorithms_with_charts(network, origin_id, resource_name, ttl=10):
     
     # Executa os três algoritmos
     result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
-    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
+    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name, ttl=ttl)
     result3 = SearchAlgorithms.informada_search(network, origin_id, resource_name)
     
     # Prepara dados para visualização
@@ -244,10 +244,11 @@ def main():
                 print("✗ Erro: Nome do recurso não pode estar vazio.")
                 continue
             
-            # Solicita TTL para flooding
+            # Solicita TTL para flooding e caminho aleatório
             ttl = None
-            if choice == '1':
-                ttl_input = input("Digite o TTL (Time To Live) para o flooding (padrão: 10): ").strip()
+            if choice in ['1', '2']:
+                algorithm_name = "flooding" if choice == '1' else "caminho aleatório"
+                ttl_input = input(f"Digite o TTL (Time To Live) para {algorithm_name} (padrão: 10): ").strip()
                 if ttl_input:
                     try:
                         ttl = int(ttl_input)
@@ -274,14 +275,14 @@ def main():
                 NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '2':
-                result = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
-                network.print_search_result(result, "Busca por Passeio Aleatório (Random Walk)")
+                result = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name, ttl=ttl)
+                network.print_search_result(result, f"Busca por Caminho Aleatório - TTL: {ttl}")
                 
                 # Gera visualização do caminho
                 if not os.path.exists('graphs'):
                     os.makedirs('graphs')
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                graph_path = f'graphs/path_passeio_aleatorio_{timestamp}.png'
+                graph_path = f'graphs/path_caminho_aleatorio_{timestamp}.png'
                 print("\nGerando visualização do caminho percorrido...")
                 NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
