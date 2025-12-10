@@ -1,7 +1,10 @@
 
 import sys
+import os
+from datetime import datetime
 from p2p_network import P2PNetwork
 from search_algorithms import SearchAlgorithms
+from visualization import NetworkVisualizer
 
 
 def print_menu():
@@ -14,8 +17,10 @@ def print_menu():
     print("  2 - Busca por Passeio Aleatório (Random Walk)")
     print("  3 - Busca Informada (Informed Search)")
     print("  4 - Comparar todos os algoritmos")
-    print("  5 - Mostrar informações da rede")
-    print("  6 - Listar todos os recursos disponíveis")
+    print("  5 - Comparar com gráficos")
+    print("  6 - Visualizar grafo da rede")
+    print("  7 - Mostrar informações da rede")
+    print("  8 - Listar todos os recursos disponíveis")
     print("  0 - Sair")
     print("="*60)
 
@@ -41,17 +46,18 @@ def list_all_resources(network):
     print("="*60 + "\n")
 
 
-def compare_algorithms(network, origin_id, resource_name):
+def compare_algorithms(network, origin_id, resource_name, ttl=10):
     """Compara todos os algoritmos de busca."""
     print("\n" + "="*60)
     print("COMPARAÇÃO DE ALGORITMOS")
     print("="*60)
     print(f"Origem: {origin_id}")
     print(f"Recurso: {resource_name}")
+    print(f"TTL: {ttl}")
     print("="*60 + "\n")
     
     # Busca por Inundação
-    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name)
+    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
     print(f"\n1. BUSCA POR INUNDAÇÃO")
     print(f"   Status: {'✓ Encontrado' if result1['found'] else '✗ Não encontrado'}")
     if result1['found']:
@@ -60,9 +66,9 @@ def compare_algorithms(network, origin_id, resource_name):
     print(f"   Nós visitados: {result1['nodes_visited']}")
     print(f"   Mensagens: {result1['messages_sent']}")
     
-    # Busca por Passeio Aleatório
-    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
-    print(f"\n2. BUSCA POR PASSEIO ALEATÓRIO")
+    # Busca por Caminho Aleatório
+    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name, ttl=ttl)
+    print(f"\n2. BUSCA POR CAMINHO ALEATÓRIO")
     print(f"   Status: {'✓ Encontrado' if result2['found'] else '✗ Não encontrado'}")
     if result2['found']:
         print(f"   Encontrado em: {result2['found_at']}")
@@ -81,6 +87,82 @@ def compare_algorithms(network, origin_id, resource_name):
     print(f"   Mensagens: {result3['messages_sent']}")
     
     print("\n" + "="*60 + "\n")
+
+
+def compare_algorithms_with_charts(network, origin_id, resource_name, ttl=10):
+    """Compara algoritmos e gera gráfico de barras."""
+    print("\n" + "="*60)
+    print("COMPARAÇÃO COM GRÁFICOS")
+    print("="*60)
+    print(f"Origem: {origin_id}")
+    print(f"Recurso: {resource_name}")
+    print(f"TTL: {ttl}")
+    print("="*60 + "\n")
+    
+    print("Executando buscas...")
+    
+    # Executa os três algoritmos
+    result1 = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
+    result2 = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name, ttl=ttl)
+    result3 = SearchAlgorithms.informada_search(network, origin_id, resource_name)
+    
+    # Prepara dados para visualização
+    results_list = [
+        {'name': 'Inundação', 'result': result1},
+        {'name': 'Passeio Aleatório', 'result': result2},
+        {'name': 'Busca Informada', 'result': result3}
+    ]
+    
+    # Gera tabela comparativa
+    NetworkVisualizer.create_comparison_table(results_list)
+    
+    # Cria diretório para gráficos se não existir
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Gera gráfico de barras
+    print("Gerando gráfico de barras comparativo...")
+    chart_path = f'graphs/comparison_{timestamp}.png'
+    NetworkVisualizer.compare_algorithms_chart(results_list, save_path=chart_path)
+    
+    # Gera grafos para cada algoritmo
+    print("\nGerando visualizações dos grafos...")
+    for result_data in results_list:
+        algo_name = result_data['name'].lower().replace(' ', '_')
+        graph_path = f'graphs/graph_{algo_name}_{timestamp}.png'
+        NetworkVisualizer.plot_network_graph(network, result_data['result'], save_path=graph_path)
+    
+    print("\n" + "="*60)
+    print("✓ Todos os gráficos foram gerados com sucesso!")
+    print(f"  Verifique a pasta 'graphs/' para visualizar os resultados.")
+    print("="*60 + "\n")
+
+
+def visualize_network_graph(network):
+    """Visualiza o grafo da rede sem busca."""
+    print("\n" + "="*60)
+    print("VISUALIZAÇÃO DO GRAFO DA REDE")
+    print("="*60)
+    print(f"Rede: {network.name}")
+    print(f"Total de nós: {len(network.nodes)}")
+    print("="*60 + "\n")
+    
+    # Cria diretório para gráficos se não existir
+    if not os.path.exists('graphs'):
+        os.makedirs('graphs')
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    graph_path = f'graphs/network_graph_{timestamp}.png'
+    
+    print("Gerando visualização do grafo...")
+    NetworkVisualizer.plot_network_graph(network, save_path=graph_path)
+    
+    print("\n" + "="*60)
+    print("✓ Grafo gerado com sucesso!")
+    print(f"  Verifique o arquivo: {graph_path}")
+    print("="*60 + "\n")
 
 
 def main():
@@ -111,6 +193,23 @@ def main():
         print(f"✗ Erro ao carregar rede: {e}")
         return
     
+    # Valida a rede
+    print("\nValidando rede...")
+    is_valid, errors = network.validate_network()
+    
+    if not is_valid:
+        print("\n" + "="*60)
+        print("✗ ERRO: A REDE NÃO É VÁLIDA")
+        print("="*60)
+        print("\nProblemas encontrados:")
+        for i, error in enumerate(errors, 1):
+            print(f"  {i}. {error}")
+        print("\n" + "="*60)
+        print("\nPor favor, corrija o arquivo de configuração e tente novamente.")
+        return
+    else:
+        print("✓ Rede validada com sucesso!")
+    
     # Loop principal
     while True:
         print_menu()
@@ -120,13 +219,16 @@ def main():
             print("\nEncerrando simulador. Até logo!")
             break
         
-        elif choice == '5':
+        elif choice == '6':
+            visualize_network_graph(network)
+        
+        elif choice == '7':
             network.print_network_info()
         
-        elif choice == '6':
+        elif choice == '8':
             list_all_resources(network)
         
-        elif choice in ['1', '2', '3', '4']:
+        elif choice in ['1', '2', '3', '4', '5']:
             # Solicita origem
             print(f"\nNós disponíveis: {', '.join(network.nodes.keys())}")
             origin_id = input("Digite o ID do nó de origem: ").strip()
@@ -142,21 +244,83 @@ def main():
                 print("✗ Erro: Nome do recurso não pode estar vazio.")
                 continue
             
+            # Solicita TTL para flooding e caminho aleatório
+            ttl = None
+            if choice in ['1', '2']:
+                algorithm_name = "flooding" if choice == '1' else "caminho aleatório"
+                ttl_input = input(f"Digite o TTL (Time To Live) para {algorithm_name} (padrão: 10): ").strip()
+                if ttl_input:
+                    try:
+                        ttl = int(ttl_input)
+                        if ttl <= 0:
+                            print("✗ Erro: TTL deve ser maior que 0. Usando padrão (10).")
+                            ttl = 10
+                    except ValueError:
+                        print("✗ Erro: TTL inválido. Usando padrão (10).")
+                        ttl = 10
+                else:
+                    ttl = 10
+            
             # Executa busca
             if choice == '1':
-                result = SearchAlgorithms.inudacao_search(network, origin_id, resource_name)
-                network.print_search_result(result, "Busca por Inundação (Flooding)")
+                result = SearchAlgorithms.inudacao_search(network, origin_id, resource_name, ttl=ttl)
+                network.print_search_result(result, f"Busca por Inundação (Flooding) - TTL: {ttl}")
+                
+                # Gera visualização do caminho
+                if not os.path.exists('graphs'):
+                    os.makedirs('graphs')
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                graph_path = f'graphs/path_inundacao_{timestamp}.png'
+                print("\nGerando visualização do caminho percorrido...")
+                NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '2':
-                result = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name)
-                network.print_search_result(result, "Busca por Passeio Aleatório (Random Walk)")
+                result = SearchAlgorithms.caminho_aleatorio_search(network, origin_id, resource_name, ttl=ttl)
+                network.print_search_result(result, f"Busca por Caminho Aleatório - TTL: {ttl}")
+                
+                # Gera visualização do caminho
+                if not os.path.exists('graphs'):
+                    os.makedirs('graphs')
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                graph_path = f'graphs/path_caminho_aleatorio_{timestamp}.png'
+                print("\nGerando visualização do caminho percorrido...")
+                NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '3':
                 result = SearchAlgorithms.informada_search(network, origin_id, resource_name)
                 network.print_search_result(result, "Busca Informada (Informed Search)")
+                
+                # Gera visualização do caminho
+                if not os.path.exists('graphs'):
+                    os.makedirs('graphs')
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                graph_path = f'graphs/path_busca_informada_{timestamp}.png'
+                print("\nGerando visualização do caminho percorrido...")
+                NetworkVisualizer.plot_network_graph(network, result, save_path=graph_path)
             
             elif choice == '4':
-                compare_algorithms(network, origin_id, resource_name)
+                ttl_input = input("Digite o TTL para o flooding (padrão: 10): ").strip()
+                ttl = 10
+                if ttl_input:
+                    try:
+                        ttl = int(ttl_input)
+                        if ttl <= 0:
+                            ttl = 10
+                    except ValueError:
+                        ttl = 10
+                compare_algorithms(network, origin_id, resource_name, ttl)
+            
+            elif choice == '5':
+                ttl_input = input("Digite o TTL para o flooding (padrão: 10): ").strip()
+                ttl = 10
+                if ttl_input:
+                    try:
+                        ttl = int(ttl_input)
+                        if ttl <= 0:
+                            ttl = 10
+                    except ValueError:
+                        ttl = 10
+                compare_algorithms_with_charts(network, origin_id, resource_name, ttl)
         
         else:
             print("✗ Opção inválida. Tente novamente.")

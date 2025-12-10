@@ -1,7 +1,9 @@
 {
   "network": {
     "name": "RedeP2P - Rede Grande",
-    "description": "Rede P2P não estruturada com 50 nós"
+    "description": "Rede P2P não estruturada com 50 nós",
+    "min_neighbors": 1,
+    "max_neighbors": 10
   },
   "nodes": [
     {"id": "node1", "name": "Node 1", "resources": ["video1.mp4", "doc1.pdf", "image1.jpg", "music1.mp3"]},
@@ -15,7 +17,7 @@
     {"id": "node9", "name": "Node 9", "resources": ["file9.txt", "doc9.pdf", "music9.mp3", "video9.avi"]},
     {"id": "node10", "name": "Node 10", "resources": ["image10.png", "video10.mp4", "doc10.pdf", "music10.mp3", "file10.txt"]},
     {"id": "node11", "name": "Node 11", "resources": ["music11.mp3", "file11.txt", "video11.mkv", "doc11.pdf"]},
-    {"id": "node12", "name": "Node 12", "resources": ["doc12.pdf", "image12.jpg", "music12.mp3", "video12.avi", "file12.txt"]},
+    {"id": "node12", "name": "Node 12", "resources": ["doc12.pdf", "image12.jpg", "music12.mp3", "video1.av2i", "file12.txt"]},
     {"id": "node13", "name": "Node 13", "resources": ["video13.mp4", "file13.txt", "doc13.pdf", "music13.mp3"]},
     {"id": "node14", "name": "Node 14", "resources": ["music14.mp3", "image14.png", "doc14.pdf", "video14.mkv", "file14.txt"]},
     {"id": "node15", "name": "Node 15", "resources": ["file15.txt", "video15.mp4", "music15.mp3", "doc15.pdf"]},

@@ -1,0 +1,50 @@
+{
+  "network": {
+    "name": "RedeP2P Example",
+    "description": "Exemplo de rede P2P não estruturada",
+    "min_neighbors": 2,
+    "max_neighbors": 3
+  },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Node 1",
+      "resources": ["r1"]
+    },
+    {
+      "id": "n2",
+      "name": "Node 2",
+      "resources": ["r2"]
+    },
+    {
+      "id": "n3",
+      "name": "Node 3",
+      "resources": ["r3"]
+    },
+    {
+      "id": "n4",
+      "name": "Node 4",
+      "resources": ["r4"]
+    },
+    {
+      "id": "n5",
+      "name": "Node 5",
+      "resources": ["r5"]
+    },
+    {
+      "id": "n6",
+      "name": "Node 6",
+      "resources": ["r6"]
+    }
+  ],
+  "connections": [
+    {"from": "n1", "to": "n2"},
+    {"from": "n1", "to": "n3"},
+    {"from": "n2", "to": "n3"},
+    {"from": "n2", "to": "n4"},
+    {"from": "n3", "to": "n5"},
+    {"from": "n4", "to": "n5"},
+    {"from": "n4", "to": "n6"},
+    {"from": "n5", "to": "n6"}
+  ]
+}
