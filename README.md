@@ -105,59 +105,79 @@ O programa oferece as seguintes opções:
 ### 1. Busca por Inundação (Flooding)
 
 **Como funciona:**
-- A consulta é propagada para todos os vizinhos do nó de origem
+- A consulta é propagada para todos os vizinhos do nó de origem simultaneamente
 - Cada nó que recebe a consulta verifica se possui o recurso
-- Se não possui, propaga para seus vizinhos (exceto quem enviou)
-- Continua até encontrar o recurso ou atingir o TTL (Time To Live)
+- Se não possui, propaga para todos os seus vizinhos (exceto quem enviou)
+- **Continua propagando mesmo após encontrar o recurso** até atingir o TTL (Time To Live)
+- Explora a rede em largura (BFS) até a profundidade definida pelo TTL
+- Registra o primeiro nó onde o recurso foi encontrado, mas não para a propagação
 
 **Parâmetros:**
-- `ttl`: Profundidade máxima de busca (padrão: 10)
+- `ttl`: Profundidade máxima de busca (padrão: 10) - número de saltos a partir da origem
 
 **Vantagens:**
-- Alta probabilidade de encontrar o recurso se ele existir
-- Simples de implementar
+- **Máxima garantia de encontrar o recurso** se ele existir dentro do TTL
+- Encontra o caminho mais curto até o recurso
+- Simples de implementar e entender
+- Comportamento determinístico
 
 **Desvantagens:**
-- Gera muito tráfego na rede (muitas mensagens)
-- Pode sobrecarregar a rede em redes grandes
+- Gera muito tráfego na rede (número exponencial de mensagens)
+- Pode sobrecarregar a rede em topologias densas ou com TTL alto
+- Alto consumo de banda mesmo após encontrar o recurso
 
 ### 2. Busca por Passeio Aleatório (Random Walk)
 
 **Como funciona:**
-- Escolhe aleatoriamente um vizinho em cada passo
-- Continua até encontrar o recurso ou atingir o número máximo de passos
-- Pode visitar o mesmo nó múltiplas vezes
+- Inicia múltiplos caminhos aleatórios a partir da origem (até 10 tentativas)
+- Em cada caminho, escolhe aleatoriamente um vizinho não visitado naquele caminho específico
+- Cada caminho pode explorar até TTL passos antes de reiniciar da origem
+- **Para imediatamente ao encontrar o recurso**
+- Evita voltar para o nó anterior imediatamente, mas pode revisitar nós em caminhos diferentes
+- Se ficar sem vizinhos disponíveis em um caminho, reinicia da origem com nova tentativa
 
 **Parâmetros:**
-- `max_steps`: Número máximo de passos (padrão: 50)
+- `ttl`: Profundidade máxima por caminho (padrão: 10) - número de passos em cada tentativa
+- `max_attempts`: Número máximo de caminhos diferentes a tentar (fixo em 10)
 
 **Vantagens:**
-- Gera menos tráfego que flooding
-- Baixo uso de recursos computacionais
+- Gera significativamente menos tráfego que flooding
+- Baixo uso de recursos computacionais e banda
+- Adequado para redes grandes onde flooding seria inviável
+- Para imediatamente ao encontrar, economizando recursos
 
 **Desvantagens:**
-- Menor probabilidade de encontrar o recurso
-- Pode levar mais tempo para encontrar
-- Comportamento não determinístico
+- Menor probabilidade de encontrar o recurso comparado ao flooding
+- Pode não encontrar recursos mesmo que existam na rede
+- Comportamento não determinístico (resultados variam entre execuções)
+- Pode explorar caminhos redundantes ou ineficientes
 
 ### 3. Busca Informada (Informed Search)
 
 **Como funciona:**
-- Utiliza heurísticas baseadas no histórico de sucesso dos vizinhos
-- Prioriza vizinhos que tiveram mais sucessos em buscas anteriores
-- Aprende com buscas passadas para melhorar o desempenho
+- Realiza busca em largura (BFS) priorizando vizinhos com melhor histórico
+- Utiliza heurísticas baseadas na taxa de sucesso dos vizinhos em buscas anteriores
+- Ordena vizinhos por número de sucessos antes de explorá-los
+- **Para imediatamente ao encontrar o recurso**
+- Atualiza contadores de sucesso ao longo do caminho quando encontra o recurso
+- Limita exploração a um número máximo de nós para evitar sobrecarga
+- Cada nó mantém estatísticas sobre qual vizinho levou a sucessos passados
 
 **Parâmetros:**
-- `max_nodes`: Número máximo de nós a visitar (padrão: 20)
+- `max_nodes`: Número máximo de nós a visitar (padrão: 20) - limita a exploração total
 
 **Vantagens:**
-- Mais eficiente que random walk após aprendizado
-- Balanceia tráfego e taxa de sucesso
-- Melhora com o uso
+- Aprende com buscas passadas e melhora com o uso da rede
+- Mais eficiente que random walk após período de aprendizado
+- Balanceia eficiência (menos nós que flooding) com taxa de sucesso
+- Explora a rede de forma mais inteligente e direcionada
+- Para imediatamente ao encontrar, economizando recursos
 
 **Desvantagens:**
-- Depende de histórico para ser eficiente
-- Pode ter viés baseado em buscas anteriores
+- Desempenho inicial é similar a busca aleatória (sem histórico)
+- Pode desenvolver viés baseado em padrões de buscas anteriores
+- Não garante encontrar o recurso (limitado por max_nodes)
+- Requer memória adicional para armazenar histórico de sucessos
 
 ## 📊 Exemplo de Uso
 
